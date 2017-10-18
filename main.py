@@ -36,6 +36,8 @@ def onMouse(event, x, y, flags, param):
             img = img2.copy()
             cv2.rectangle(img, (ix, iy), (x, y), (0, 0, 255), 2)
             rect = (min(ix, iy), min(iy, y), abs(ix-x), abs(iy-y))
+            cv2.imshow('output', img)
+
 
     elif event == cv2.EVENT_RBUTTONUP:
         rectangle = False
@@ -116,41 +118,41 @@ while True:
         else:
             print('else')
 
-        continue
+        #continue
     else:
         k = cv2.waitKey(1) & 0xFF
 
 
-    ret, frame = cap.read()
-    frame2 = frame.copy()
-    cv2.setMouseCallback('output', onMouse, param=(frame, frame2))
-    cv2.imshow('output', frame)
+        ret, frame = cap.read()
+        frame2 = frame.copy()
+        cv2.setMouseCallback('output', onMouse, param=(frame, frame2))
+        cv2.imshow('output', frame)
 
-    if not ret:
-        print('비디오 읽기 오류')
-        break
+        if not ret:
+            print('비디오 읽기 오류')
+            break
 
 
 
-    if k == 27: #ESC
-        break
-    elif k == 32: #SpaceBar
-         space_Button = True
-    # elif k == ord('s'): #s버튼 눌러진 이후부터 사각형부분을 저장
-    #     s_Button = True
-    #     width = int(cap.get(3))
-    #     height = int(cap.get(4))
-    #     fcc = cv2.VideoWriter_fourcc('D','I','V','X')
-    #     fps = 60.0
-    #
-    #     saveName = 'trans_'+videoName
-    #     out = cv2.VideoWriter(saveName, fcc, fps, (width, height))
-    #     out.write(frame)
-    #
-    # elif k == ord('x'):
-    #     print('next frame')
-    # else:
-    #     print('else')
+        if k == 27: #ESC
+            break
+        elif k == 32: #SpaceBar
+             space_Button = True
+        # elif k == ord('s'): #s버튼 눌러진 이후부터 사각형부분을 저장
+        #     s_Button = True
+        #     width = int(cap.get(3))
+        #     height = int(cap.get(4))
+        #     fcc = cv2.VideoWriter_fourcc('D','I','V','X')
+        #     fps = 60.0
+        #
+        #     saveName = 'trans_'+videoName
+        #     out = cv2.VideoWriter(saveName, fcc, fps, (width, height))
+        #     out.write(frame)
+        #
+        # elif k == ord('x'):
+        #     print('next frame')
+        # else:
+        #     print('else')
 
 
 
