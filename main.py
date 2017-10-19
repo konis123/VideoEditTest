@@ -19,6 +19,19 @@ rect_or_mask = 100
 value = DRAW_FG
 thickness = 3
 
+font = cv2.FONT_HERSHEY_SIMPLEX
+
+#바운딩박스, 녹화표시,
+def display():
+
+    #레이어1
+
+    #레이어2
+
+    #레이어3
+
+    return
+
 def onMouse(event, x, y, flags, param):
     global ix, iy, img, img2, rectangle
     global rect, rect_over
@@ -48,27 +61,6 @@ def onMouse(event, x, y, flags, param):
         #rect_or_mask = 0
         print('n:적용하기')
 
-    '''
-    if event == cv2.EVENT_LBUTTONDOWN:
-        if not rect_over:
-            print('마우스 왼쪽 버튼을 누른채로 전경부분 클릭')
-        else:
-            drawing = True
-            cv2.circle(img, (x,y), thickness, value['color'], -1)
-            cv2.circle(mask, (x,y), thickness, value['val'], -1)
-
-    elif event == cv2.EVENT_MOUSEMOVE:
-        if drawing:
-            cv2.circle(img, (x,y), thickness, value['color'], -1)
-            cv2.circle(mask, (x,y), thickness, value['val'], -1)
-
-    elif event == cv2.EVENT_LBUTTONUP:
-        if drawing:
-            drawing = False
-            cv2.circle(img, (x,y), thickness, value['color'], -1)
-            cv2.circle(mask, (x,y), thickness, value['val'], -1)
-    '''
-
     return
 
 
@@ -87,7 +79,7 @@ s_Button = False
 width = int(cap.get(3))
 height = int(cap.get(4))
 fcc = cv2.VideoWriter_fourcc('D','I','V','X')
-fps = 60.0
+fps = 20.0
 
 saveName = 'trans_'+videoName
 out = cv2.VideoWriter(saveName, fcc, fps, (width, height))
@@ -102,8 +94,11 @@ while True:
         elif k == ord('s'): #s버튼 눌러진 이후부터 사각형부분을 저장
             if s_Button:
                 s_Button = False
+                cv2.imshow('output', frame2)
             else:
                 s_Button = True
+                cv2.putText(frame, 'REC', (width-250,100), font, 4, (0,0,255), 2)
+                cv2.imshow('output', frame)
 
         elif k == ord('x'):
             print('next frame')
@@ -123,37 +118,38 @@ while True:
         k = cv2.waitKey(1) & 0xFF
 
 
-        ret, frame = cap.read()
-        frame2 = frame.copy()
-        cv2.setMouseCallback('output', onMouse, param=(frame, frame2))
-        cv2.imshow('output', frame)
-
-        if not ret:
-            print('비디오 읽기 오류')
-            break
-
-
 
         if k == 27: #ESC
             break
         elif k == 32: #SpaceBar
-             space_Button = True
-        # elif k == ord('s'): #s버튼 눌러진 이후부터 사각형부분을 저장
-        #     s_Button = True
-        #     width = int(cap.get(3))
-        #     height = int(cap.get(4))
-        #     fcc = cv2.VideoWriter_fourcc('D','I','V','X')
-        #     fps = 60.0
-        #
-        #     saveName = 'trans_'+videoName
-        #     out = cv2.VideoWriter(saveName, fcc, fps, (width, height))
-        #     out.write(frame)
-        #
+            space_Button = True
+        elif k == ord('s'): #s버튼 눌러진 이후부터 사각형부분을 저장
+            if s_Button:
+                s_Button = False
+                cv2.imshow('output', frame2)
+            else:
+                s_Button = True
+                cv2.putText(frame, 'REC', (width-100,10), font, 4, (0,0,255), 2)
+                cv2.imshow('output', frame)
+
         # elif k == ord('x'):
         #     print('next frame')
         # else:
         #     print('else')
 
+        ret, frame = cap.read()
+        if not ret:
+            print('비디오 읽기 오류')
+            break
+
+        frame2 = frame.copy()
+        if s_Button:
+            out.write(frame)
+
+        cv2.imshow('output', frame)
+
+        #마우스콜백 등록
+        cv2.setMouseCallback('output', onMouse, param=(frame, frame2))
 
 
 
