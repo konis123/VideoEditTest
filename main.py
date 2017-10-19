@@ -8,153 +8,143 @@ import numpy as np
 
 '''
 
+#Button
+global s_Button, space_Button
+global ix, iy, dx, dy, img, img2, rectangle, rect
+
 DRAW_BG = {'color':(255,0,0), 'val':0}
 DRAW_FG = {'color':(255,255,255), 'val':1}
 
+#전역변수 초기값들 입력
+s_Button = False
+space_Button = False
 rect = (0, 0, 0, 1)
-drawing = False
 rectangle = False
-rect_over = False
-rect_or_mask = 100
 value = DRAW_FG
 thickness = 3
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 
+
 #바운딩박스, 녹화표시,
-def display():
+def display(mouseX=0,mouseY=0):
+    global ix, iy, img, img2, rectangle, rect
 
-    #레이어1
+    if rectangle:
+        img = img2.copy()
+        cv2.rectangle(img, (ix, iy), (mouseX, mouseY), (0, 0, 255), 2)
+        rect = (min(ix, iy), min(iy, mouseY), abs(ix-mouseX), abs(iy-mouseY))
+        cv2.imshow('output', img)
+    else:
+        cv2.imshow('output',img)
 
-    #레이어2
-
-    #레이어3
 
     return
 
-def onMouse(event, x, y, flags, param):
-    global ix, iy, img, img2, rectangle
-    global rect, rect_over
 
-    img = param[0]
-    img2 = param[1]
+def keyInput(t):
+    global s_Button, space_Button
+    global dx, dy
+    k = cv2.waitKey(t) & 0xFF
+
+    if k == 27: #ESC
+        return 0
+    elif k == 32: #SpaceBar
+        space_Button = False
+    elif k == ord('s'): #s버튼 눌러진 이후부터 사각형부분을 저장
+        print('record start')
+        if s_Button:
+            s_Button = False
+        else:
+            s_Button = True
+
+    elif k == ord('x'):
+        print('next frame')
+        ret, frame = cap.read()
+        frame2 = frame.copy()
+        if s_Button:
+            out.write(frame)
+
+    else:
+        print('else')
+
+    display(mouseX=dx, mouseY=dy)
+
+def onMouse(event, x, y, flags, param):
+    global ix, iy, img, img2, rectangle, rect, dx, dy
+
+    #img = param[0]
+    #img2 = param[1]
 
     if event == cv2.EVENT_RBUTTONDOWN:
         rectangle = True
         ix, iy = x, y
         print("마우스눌림")
     elif event == cv2.EVENT_MOUSEMOVE:
-        print('mouse moving')
+        #print('mouse moving')
+        dx, dy = x, y
         if rectangle:
-            img = img2.copy()
-            cv2.rectangle(img, (ix, iy), (x, y), (0, 0, 255), 2)
-            rect = (min(ix, iy), min(iy, y), abs(ix-x), abs(iy-y))
-            cv2.imshow('output', img)
-
+            #img = img2.copy()
+            display(mouseX=x,mouseY=y)
 
     elif event == cv2.EVENT_RBUTTONUP:
         rectangle = False
-        rect_over = True
+        #cv2.rectangle(img, (ix, iy), (x, y), (0,0,255), 2)
+        #rect = (min(ix, iy), min(iy, y), abs(ix-x), abs(iy-y))
 
-        cv2.rectangle(img, (ix, iy), (x, y), (0,0,255), 2)
-        rect = (min(ix, iy), min(iy, y), abs(ix-x), abs(iy-y))
-        #rect_or_mask = 0
         print('n:적용하기')
 
     return
 
 
-cv2.namedWindow('output')
-cv2.moveWindow('output', 0, 0)
+#main
+if __name__=="__main__":
 
-videoName = 'sample.mp4'
-out = None
+    cv2.namedWindow('output')
+    cv2.moveWindow('output', 0, 0)
 
-cap = cv2.VideoCapture(videoName)
+    videoName = 'sample.mp4'
+    out = None
 
-space_Button = False
-s_Button = False
+    cap = cv2.VideoCapture(videoName)
 
-
-width = int(cap.get(3))
-height = int(cap.get(4))
-fcc = cv2.VideoWriter_fourcc('D','I','V','X')
-fps = 20.0
-
-saveName = 'trans_'+videoName
-out = cv2.VideoWriter(saveName, fcc, fps, (width, height))
-
-while True:
-    if space_Button == True:
-        k = cv2.waitKey(0) & 0xFF
-        if k == 27: #ESC
-            break
-        elif k == 32: #SpaceBar
-            space_Button = False
-        elif k == ord('s'): #s버튼 눌러진 이후부터 사각형부분을 저장
-            if s_Button:
-                s_Button = False
-                cv2.imshow('output', frame2)
-            else:
-                s_Button = True
-                cv2.putText(frame, 'REC', (width-250,100), font, 4, (0,0,255), 2)
-                cv2.imshow('output', frame)
-
-        elif k == ord('x'):
-            print('next frame')
-            ret, frame = cap.read()
-            frame2 = frame.copy()
-            if s_Button:
-                out.write(frame)
-
-            cv2.imshow('output', frame)
+    space_Button = False
+    s_Button = False
 
 
-        else:
-            print('else')
+    width = int(cap.get(3))
+    height = int(cap.get(4))
+    fcc = cv2.VideoWriter_fourcc('D','I','V','X')
+    fps = 20.0
 
-        #continue
-    else:
-        k = cv2.waitKey(1) & 0xFF
+    saveName = 'trans_'+videoName
+    out = cv2.VideoWriter(saveName, fcc, fps, (width, height))
 
-
-
-        if k == 27: #ESC
-            break
-        elif k == 32: #SpaceBar
-            space_Button = True
-        elif k == ord('s'): #s버튼 눌러진 이후부터 사각형부분을 저장
-            if s_Button:
-                s_Button = False
-                cv2.imshow('output', frame2)
-            else:
-                s_Button = True
-                cv2.putText(frame, 'REC', (width-100,10), font, 4, (0,0,255), 2)
-                cv2.imshow('output', frame)
-
-        # elif k == ord('x'):
-        #     print('next frame')
-        # else:
-        #     print('else')
+    while True:
 
         ret, frame = cap.read()
         if not ret:
             print('비디오 읽기 오류')
             break
 
-        frame2 = frame.copy()
-        if s_Button:
-            out.write(frame)
-
-        cv2.imshow('output', frame)
+        img = frame
+        img2 = frame.copy()   #기존이미지를 복사함
 
         #마우스콜백 등록
-        cv2.setMouseCallback('output', onMouse, param=(frame, frame2))
+        cv2.setMouseCallback('output', onMouse)
+
+        #프레임 display
+        display()
+
+        #키입력 등록
+        if keyInput(0) == 0:
+            break;
 
 
 
 
-cap.release()
-if out != None:
-    out.release()
-cv2.destroyAllWindows()
+
+    cap.release()
+    if out != None:
+        out.release()
+    cv2.destroyAllWindows()
